@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "yarik"
+version = "0.1.0"
+description = "skypro"
+authors = ["yarik"]
+license = "-"
+readme = "README.md"
+
+packages = [
+    { include = "yarik" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.2.0"
+black = "^25.1.0"
+isort = "^6.0.1"
+mypy = "^1.16.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+files = ["yarik"]
+ignore_missing_imports = true
+strict_optional = true
+disallow_untyped_defs = true
