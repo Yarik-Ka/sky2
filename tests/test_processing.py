@@ -1,5 +1,6 @@
 import pytest
-from processing import filter_by_state, sort_by_date
+
+from src.processing import filter_by_state, sort_by_date
 
 # Пример данных для тестирования
 sample_transactions = [
