@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import Dict, List
 
 def filter_by_state(
     transactions: List[Dict],
@@ -6,14 +6,8 @@ def filter_by_state(
 ) -> List[Dict]:
     """
     Возвращает список транзакций, у которых ключ 'state' совпадает с переданным значением.
-
-    :param transactions: список словарей с данными о транзакциях
-    :param state: значение ключа 'state' для фильтрации (по умолчанию 'EXECUTED')
-    :return: отфильтрованный список транзакций
     """
     return [transaction for transaction in transactions if transaction.get('state') == state]
-
-
 
 def sort_by_date(
     transactions: List[Dict],
@@ -21,9 +15,5 @@ def sort_by_date(
 ) -> List[Dict]:
     """
     Возвращает список транзакций, отсортированный по дате.
-
-    :param transactions: список словарей с данными о транзакциях
-    :param reverse: порядок сортировки; True — по убыванию, False — по возрастанию (по умолчанию)
-    :return: отсортированный список транзакций
     """
     return sorted(transactions, key=lambda x: x.get('date', ''), reverse=reverse)
