@@ -1,16 +1,27 @@
-import pytest
-from masks import get_mask_account, get_mask_card_number
+import typing
 
-@pytest.mark.parametrize("account_number, expected", [
-    ("1234567890", "******7890"),
-    ("9876543210", "******3210"),
-])
-def test_get_mask_account(account_number, expected):
-    assert get_mask_account(account_number) == expected
+from src.masks import get_mask_account, get_mask_card_number
 
-@pytest.mark.parametrize("card_number, expected", [
-    ("1234 5678 9012 3456", "**** **** **** 3456"),
-    ("1234567890123456", "**** **** **** 3456"),
-])
-def test_get_mask_card_number(card_number, expected):
-    assert get_mask_card_number(card_number) == expected
+
+def test_get_mask_card(fixture_for_mask: typing.Any) -> typing.Any:
+    assert get_mask_card_number(fixture_for_mask) == "1234 56** **** 3456"
+
+
+def test_for_atypical_numbers() -> None:
+    assert get_mask_card_number("!@#$%^&*()--===") == "Error: invalid number format"
+
+
+def test_for_an_empty_value() -> None:
+    assert get_mask_card_number("") == "Error: invalid number format"
+
+
+def test_get_mask_account(fixture_for_mask: typing.Any) -> typing.Any:
+    assert get_mask_account(fixture_for_mask) == "**7890"
+
+
+def test_for_atypical_account() -> None:
+    assert get_mask_account("!@#$$%^^^&^%$") == "Error: invalid account format"
+
+
+def test_for_incorrect_num_len() -> None:
+    assert get_mask_account("1234567890") == "Error: invalid account format"

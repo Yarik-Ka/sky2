@@ -1,50 +1,40 @@
+import typing
+
 import pytest
-from widget import mask_account_card, get_date
 
-# Тестирование функции mask_account_card с разными типами данных
-@pytest.mark.parametrize("input_value, expected_type", [
-    ("1234 5678 9012 3456", "card"),
-    ("1234 5678", "account"),
-])
-def test_mask_account_card_correct_type(input_value, expected_type):
-    result = mask_account_card(input_value)
-    # В зависимости от типа входных данных проверяем результат
-    if expected_type == "card":
-        assert "****" in result or isinstance(result, str)
-    else:
-        assert result.startswith("**") or isinstance(result, str)
+from src.widget import get_date, mask_account_card
 
-@pytest.mark.parametrize("invalid_input", [
-    1234567890,
-    None,
-    12.34,
-    [],
-])
-def test_mask_account_card_invalid_input(invalid_input):
-    with pytest.raises(Exception):
-        mask_account_card(invalid_input)
 
-# Тестирование функции get_date с различными форматами дат
-@pytest.mark.parametrize("input_str, expected_output", [
-    ("2023-10-01", "01.10.2023"),
-    ("01/10/2023", "01.10.2023"),
-    ("10-01-2023", "01.10.2023"),
-])
-def test_get_date_various_formats(input_str, expected_output):
-    result = get_date(input_str)
-    assert result == expected_output
+def test_mask_account_card() -> None:
+    assert mask_account_card("Visa Platinum 7000792289606361") == "Visa Platinum 7000 79** **** 6361"
+    assert mask_account_card("Счет 73654108430135874305") == "Счет **4305"
 
-# Граничные случаи и нестандартные строки
-@pytest.mark.parametrize("input_str", [
-    "",             # пустая строка
-    "не дата",      # строка без даты
-    "2023-02-29",   # некорректная дата (февраль 29 в невисокосном году)
-])
-def test_get_date_edge_cases(input_str):
-    try:
-        result = get_date(input_str)
-        # Можно проверить, что результат — строка или None
-        assert isinstance(result, str) or result is None
-    except Exception:
-        # Если функция должна выбрасывать исключение для некорректных дат — это тоже допустимо
-        pass
+
+@pytest.mark.parametrize(
+    "value, expected_result",
+    [
+        ("МИР 1234567890123456", "МИР 1234 56** **** 3456"),
+        ("Mastercard 0934567890123453", "Mastercard 0934 56** **** 3453"),
+        ("Счет 09876543210987654321", "Счет **4321"),
+        ("Счет 12345678901234567890", "Счет **7890"),
+    ],
+)
+def test_mask_ac_card_advanced(value: str, expected_result: str) -> None:
+    assert mask_account_card(value) == expected_result
+
+
+def test_for_atypical_number() -> None:
+    assert mask_account_card("!@#$%^&*()") == "Error: invalid number or account format"
+    assert mask_account_card("") == "Error: invalid number or account format"
+
+
+def test_get_date() -> None:
+    assert get_date("2025-04-11T02:26:18.671407") == "11.04.2025"
+
+
+def test_for_atypical_date(fixture_for_date: typing.Any) -> None:
+    assert get_date(fixture_for_date) == "07.12.3034"
+
+
+def test_for_empty_date() -> None:
+    assert get_date("") == "Please, enter the date in the 'year-month-day' format"
