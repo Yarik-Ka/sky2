@@ -1,39 +1,40 @@
+import typing
+
 import pytest
-from src.widget import mask_card_number, mask_account
 
-# Мокаем функции из модуля masks, чтобы не зависеть от их реализации
-from unittest.mock import patch
+from src.widget import get_date, mask_account_card
 
-@pytest.fixture(autouse=True)
-def patch_masks():
-    with patch('src.widget.get_mask_card_number') as mock_mask_card, \
-         patch('src.widget.get_mask_account') as mock_mask_acc:
-        # Настраиваем возвращаемые значения для моков
-        mock_mask_card.return_value = "**** **** **** 3456"
-        mock_mask_acc.return_value = "**** 7890"
-        yield
 
-@pytest.mark.parametrize("card_number, expected", [
-    ("1234 5678 9012 3456", "**** **** **** 3456"),
-    ("1111 2222 3333 4444", "**** **** **** 4444"),
-])
-def test_mask_card_number(card_number, expected):
-    result = mask_card_number(card_number)
-    assert result == expected
+def test_mask_account_card() -> None:
+    assert mask_account_card("Visa Platinum 7000792289606361") == "Visa Platinum 7000 79** **** 6361"
+    assert mask_account_card("Счет 73654108430135874305") == "Счет **4305"
 
-@pytest.mark.parametrize("account_number, expected", [
-    ("987654321", "**** 789"),
-    ("1234567890", "**** 890"),
-])
-def test_mask_account(account_number, expected):
-    result = mask_account(account_number)
-    assert result == expected
 
-# Можно добавить тесты на неправильный тип
-def test_mask_card_number_invalid_type():
-    with pytest.raises(ValueError):
-        mask_card_number(1234567890)  # не строка
+@pytest.mark.parametrize(
+    "value, expected_result",
+    [
+        ("МИР 1234567890123456", "МИР 1234 56** **** 3456"),
+        ("Mastercard 0934567890123453", "Mastercard 0934 56** **** 3453"),
+        ("Счет 09876543210987654321", "Счет **4321"),
+        ("Счет 12345678901234567890", "Счет **7890"),
+    ],
+)
+def test_mask_ac_card_advanced(value: str, expected_result: str) -> None:
+    assert mask_account_card(value) == expected_result
 
-def test_mask_account_invalid_type():
-    with pytest.raises(ValueError):
-        mask_account(None)  # не строка
+
+def test_for_atypical_number() -> None:
+    assert mask_account_card("!@#$%^&*()") == "Error: invalid number or account format"
+    assert mask_account_card("") == "Error: invalid number or account format"
+
+
+def test_get_date() -> None:
+    assert get_date("2025-04-11T02:26:18.671407") == "11.04.2025"
+
+
+def test_for_atypical_date(fixture_for_date: typing.Any) -> None:
+    assert get_date(fixture_for_date) == "07.12.3034"
+
+
+def test_for_empty_date() -> None:
+    assert get_date("") == "Please, enter the date in the 'year-month-day' format"
